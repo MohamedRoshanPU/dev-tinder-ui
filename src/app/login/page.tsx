@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,6 +22,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { setUser } from "@/redux/slices/userSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { getRequest, postRequest } from "@/utils/networkActions";
+import cookies from "js-cookie";
+import { redirect, useRouter } from "next/navigation";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -43,6 +50,9 @@ const formSchema = z.object({
 });
 
 const Login = () => {
+  const dispatch = useDispatch();
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -51,7 +61,34 @@ const Login = () => {
     },
   });
 
-  const onSubmit = async () => {};
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      let res: any = await postRequest("/api/auth/login", values);
+      if (res) {
+        dispatch(
+          setUser({
+            email: res.data.email,
+            id: res.data.id,
+            firstName: res.data.firstName,
+            lastName: res.data.lastName,
+          })
+        );
+        router.push("/feed");
+      }
+    } catch (error) {
+      console.log(`page,  : error`, error);
+    }
+  };
+
+  const getData = async () => {
+    try {
+      let data = await getRequest("/api/feed");
+    } catch (error) {}
+  };
+
+  useEffect(() => {
+    getData();
+  }, []);
 
   return (
     <div className="w-full h-screen bg-gray-100 flex justify-center items-center">
@@ -71,7 +108,7 @@ const Login = () => {
                 name="email"
                 render={({ field }) => (
                   <FormItem className="space-y-1">
-                    <FormLabel>Email</FormLabel>
+                    <Label>Email</Label>
                     <FormControl>
                       <Input placeholder="Enter your email" {...field} />
                     </FormControl>
@@ -84,7 +121,7 @@ const Login = () => {
                 name="password"
                 render={({ field }) => (
                   <FormItem className="space-y-1">
-                    <FormLabel>Password</FormLabel>
+                    <Label>Password</Label>
                     <FormControl>
                       <Input
                         placeholder="Enter your password"
