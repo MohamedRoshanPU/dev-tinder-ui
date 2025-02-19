@@ -26,28 +26,10 @@ import { Label } from "@/components/ui/label";
 import { setUser } from "@/redux/slices/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import { getRequest, postRequest } from "@/utils/networkActions";
+import { customGetRequest, customPostRequest } from "@/utils/networkActions";
 import cookies from "js-cookie";
 import { redirect, useRouter } from "next/navigation";
-
-const formSchema = z.object({
-  email: z.string().email({
-    message: "Invalid Email Address",
-  }),
-  password: z
-    .string()
-    .min(8, { message: "Password must be at least 8 characters long" })
-    .regex(/[A-Z]/, {
-      message: "Password must contain at least one uppercase letter",
-    })
-    .regex(/[a-z]/, {
-      message: "Password must contain at least one lowercase letter",
-    })
-    .regex(/[0-9]/, { message: "Password must contain at least one number" })
-    .regex(/[\W_]/, {
-      message: "Password must contain at least one special character",
-    }),
-});
+import { formSchema } from "@/utils/schema/loginUserSchema";
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -63,7 +45,7 @@ const Login = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      let res: any = await postRequest("/api/auth/login", values);
+      let res: any = await customPostRequest("/api/auth/login", values);
       if (res) {
         dispatch(
           setUser({
@@ -82,7 +64,7 @@ const Login = () => {
 
   const getData = async () => {
     try {
-      let data = await getRequest("/api/feed");
+      let data = await customGetRequest("/api/feed");
     } catch (error) {}
   };
 
