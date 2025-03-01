@@ -1,9 +1,8 @@
-"use client";
+import Feed from "@/components/pageComponents/feed/Feed";
 import React from "react";
-import withAuth from "../../utils/withAuth";
 
-const Feed = () => {
-  return <div>Feed</div>;
+const page = () => {
+  return <Feed />;
 };
 
-export default withAuth(Feed);
+export default page;

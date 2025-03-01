@@ -11,27 +11,25 @@ const Api = axios.create({
 
 const handleResponse = (res: AxiosResponse) => res.data;
 
-export const customGetRequest = async <T>(
-  url: string
-): Promise<T | undefined> => {
+export const customGetRequest = async <T>(url: string): Promise<T> => {
   try {
     let res: AxiosResponse<T> = await Api.get<T>(url);
     return handleResponse(res);
   } catch (error) {
     handleApiError(error);
-    return undefined;
+    throw error;
   }
 };
 
 export const customPostRequest = async <T>(
   url: string,
   data: any
-): Promise<T | undefined> => {
+): Promise<T> => {
   try {
     let res: AxiosResponse<T> = await Api.post<T>(url, data);
     return handleResponse(res);
   } catch (error) {
     handleApiError(error);
-    return undefined;
+    throw error;
   }
 };

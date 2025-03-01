@@ -1,10 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface UserDataType {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
+  id?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
 }
 
 const initialState: UserDataType = {

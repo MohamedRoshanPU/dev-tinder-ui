@@ -8,30 +8,28 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-  CardFooter,
   CardContent,
 } from "@/components/ui/card";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { setUser } from "@/redux/slices/userSlice";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
+import { useDispatch } from "react-redux";
 import { customGetRequest, customPostRequest } from "@/utils/networkActions";
-import cookies from "js-cookie";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { formSchema } from "@/utils/schema/loginUserSchema";
+import { useLogin } from "@/queries/authQueries";
+import { toast } from "react-hot-toast";
 
 const Login = () => {
+  const { mutate: login, isPending } = useLogin();
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -44,33 +42,21 @@ const Login = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    try {
-      let res: any = await customPostRequest("/api/auth/login", values);
-      if (res) {
+    login(values, {
+      onSuccess(data) {
+        toast.success(data?.message || "Successfully Loggedin");
         dispatch(
           setUser({
-            email: res.data.email,
-            id: res.data.id,
-            firstName: res.data.firstName,
-            lastName: res.data.lastName,
+            email: data?.data?.email,
+            firstName: data?.data?.firstName,
+            id: data?.data?.id,
+            lastName: data?.data?.lastName,
           })
         );
         router.push("/feed");
-      }
-    } catch (error) {
-      console.log(`page,  : error`, error);
-    }
+      },
+    });
   };
-
-  const getData = async () => {
-    try {
-      let data = await customGetRequest("/api/feed");
-    } catch (error) {}
-  };
-
-  useEffect(() => {
-    getData();
-  }, []);
 
   return (
     <div className="w-full h-screen bg-gray-100 flex justify-center items-center">
@@ -116,7 +102,9 @@ const Login = () => {
                   </FormItem>
                 )}
               />
-              <Button type="submit">Submit</Button>
+              <Button type="submit" disabled={isPending}>
+                Submit
+              </Button>
             </form>
           </Form>
         </CardContent>
