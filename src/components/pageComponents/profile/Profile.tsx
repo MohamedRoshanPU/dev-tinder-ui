@@ -31,7 +31,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useGetUserData } from "@/queries/userProfileQueries";
+import { useGetUserData, useUpdateUser } from "@/queries/userProfileQueries";
 import { formSchema } from "@/utils/schema/userProfileSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarIcon, PlusCircle, X } from "lucide-react";
@@ -39,20 +39,11 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { format } from "date-fns";
-
-interface UserDataType {
-  firstName: string;
-  lastName: string;
-  dateOfBirth: Date;
-  gender: "male" | "female" | "others";
-  designation: string;
-  skills: string[];
-  email: string;
-}
+import toast from "react-hot-toast";
 
 const Profile = () => {
-  const [userData, setUserData] = useState<UserDataType | null>(null);
-  const { data: userDataFetched, isPending } = useGetUserData();
+  const { data: userDataFetched, refetch } = useGetUserData();
+  const { mutate: updateUser } = useUpdateUser();
   const [skills, setSkills] = useState<string[]>([]);
   const [newSkill, setNewSkill] = useState("");
 
@@ -73,15 +64,6 @@ const Profile = () => {
   useEffect(() => {
     if (userDataFetched) {
       const data = userDataFetched.data;
-      setUserData({
-        firstName: data.firstName,
-        lastName: data.lastName,
-        dateOfBirth: data.dateOfBirth && new Date(data.dateOfBirth),
-        designation: data.designation,
-        email: data.email,
-        gender: data.gender,
-        skills: data.skills || [],
-      });
 
       form.reset({
         firstName: data.firstName || "",
@@ -98,8 +80,12 @@ const Profile = () => {
   }, [userDataFetched, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    // Submit logic here
+    updateUser(values, {
+      onSuccess: (data) => {
+        toast.success(data.message || "Successfully updated");
+        refetch();
+      },
+    });
   }
 
   const addSkill = () => {
@@ -161,6 +147,7 @@ const Profile = () => {
             <FormField
               control={form.control}
               name="email"
+              disabled
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>

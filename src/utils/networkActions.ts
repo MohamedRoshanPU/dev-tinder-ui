@@ -33,3 +33,16 @@ export const customPostRequest = async <T>(
     throw error;
   }
 };
+
+export const customPatchRequest = async <T>(
+  url: string,
+  data: any
+): Promise<T> => {
+  try {
+    let res: AxiosResponse<T> = await Api.patch(url, data);
+    return handleResponse(res);
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+};

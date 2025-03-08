@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [{ source: "/", destination: "/feed", permanent: true }];
   },
+  images: {
+    domains: ["avatar.iran.liara.run"], // Add this domain
+  },
 };
 
 export default nextConfig;
